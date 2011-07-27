@@ -27,7 +27,6 @@ data Game = GameStruct
 initGame (GameConfig w h) = do
   SDL.init [InitEverything]
   MIX.openAudio 44100 AudioS16Sys 2 1024
-  music <- R.playBGM
   window <- setVideoMode w h 16 [HWSurface, DoubleBuf]
   img <- R.loadImages
   return $ GameStruct
@@ -36,16 +35,14 @@ initGame (GameConfig w h) = do
     , player = (200, 500)
     , images = img
     , frames = 0
-    , bgm = music
+    , bgm = error "This branch have NO BGM."
     }
 
 quitGame (GameStruct { gameWindow = w
                      , images = imgs
-                     , bgm = music
                      }) = do
   freeSurface w
   R.freeImages imgs
-  R.stopBGM music
   MIX.closeAudio
   quit
 
