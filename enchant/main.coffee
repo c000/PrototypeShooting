@@ -4,8 +4,8 @@ player = undefined
 enemies = []
 bgWaves = 64
 bgMoves =
-	x: 40 * Math.sin(Math.PI * 2 * i / bgWaves) for i in [0..bgWaves]
-	y: 30 * Math.sin(Math.PI * 4 * i / bgWaves) for i in [0..bgWaves]
+	x: 60 * Math.sin(Math.PI * 2 * i / bgWaves) for i in [0..bgWaves]
+	y: 50 * Math.sin(Math.PI * 4 * i / bgWaves) for i in [0..bgWaves]
 
 class yura
 	@state = 0
@@ -20,7 +20,7 @@ class yura
 BackGround = enchant.Class.create enchant.Sprite,
 	initialize: (i) ->
 		@i = i % bgWaves
-		enchant.Sprite.call this, 640, 50
+		enchant.Sprite.call this, 640, 60
 		@image = game.assets['Images/bg' + ((i%16)+1) + '.png']
 		this._element.style.zIndex = 0
 		@addEventListener 'enterframe', ->
@@ -52,9 +52,11 @@ Player = enchant.Class.create enchant.Sprite,
 				new PlayerBullet(@x+@width/2, @y, 180)
 				# new PlayerBullet(@x+@width/2, @y, 180-15)
 				# new PlayerBullet(@x+@width/2, @y, 180+15)
-				@shootSpan = 2
+				@shootSpan = 4
 			@shootSpan--
 		game.rootScene.addChild(this)
+	death: ->
+		console.log("Damaged")
 
 Enemy = enchant.Class.create enchant.Sprite,
 	initialize: (x,y,moveFunc) ->
