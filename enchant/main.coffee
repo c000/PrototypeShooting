@@ -3,10 +3,12 @@
 game = undefined
 player = undefined
 enemies = []
+enemyKillCount = 0
+items = []
 bgWaves = 64
 bgMoves =
-	x: 60 * Math.sin(Math.PI * 2 * i / bgWaves) for i in [0..bgWaves]
-	y: 50 * Math.sin(Math.PI * 4 * i / bgWaves) for i in [0..bgWaves]
+	x: (60 * Math.sin(Math.PI * 2 * i / bgWaves) for i in [0..bgWaves])
+	y: (50 * Math.sin(Math.PI * 4 * i / bgWaves) for i in [0..bgWaves])
 
 BackGround = enchant.Class.create enchant.Sprite,
 	initialize: (@scene,i) ->
@@ -35,9 +37,10 @@ Player = enchant.Class.create enchant.Sprite,
 		@x = x - (@width / 2)
 		@y = y - (@height / 2)
 		@frame = 1
-		@shootSound = new SoundLoader(game.assets['Audio/enemyShoot.wav'])
+		# @shootSound = new SoundLoader(game.assets['Audio/enemyShoot.wav'])
 		@moveSpeed = 6
 		@shootSpan = 0
+		@shootType = 0
 		@addEventListener 'enterframe', (e) ->
 			if game.input.right
 				@x += @moveSpeed
@@ -49,12 +52,16 @@ Player = enchant.Class.create enchant.Sprite,
 				@y += @moveSpeed
 			if game.input.a && @shootSpan <= 0
 				new PlayerBullet(@scene, @x+@width/2, @y, 180)
-				# new PlayerBullet(@scene, @x+@width/2, @y, 180-15)
-				# new PlayerBullet(@scene, @x+@width/2, @y, 180+15)
-				@shootSound.play()
+				for i in [0..@shootType]
+					new PlayerBullet(@scene, @x+@width/2, @y, 180 - 15 * i)
+					new PlayerBullet(@scene, @x+@width/2, @y, 180 + 15 * i)
+				# @shootSound.play()
 				@shootSpan = 4
 			@shootSpan--
 		scene.addChild(this)
+	item: (i) ->
+		switch i
+			when 0 then ++@shootType
 	death: ->
 		game.popScene()
 
@@ -75,6 +82,32 @@ Bang = enchant.Class.create enchant.Sprite,
 		@scene.removeChild @
 		delete @
 
+Item = enchant.Class.create enchant.Sprite,
+	initialize: (@scene,x,y) ->
+		enchant.Sprite.call this, 32, 32
+		@image = game.assets['Images/player.png']
+		@x = x
+		@y = y
+		@age = 0
+		@itemNumber = 0
+		this._element.style.zIndex = 3
+		scene.addChild this
+		@addEventListener 'enterframe', ->
+			++@age
+			@x += 12 * Math.cos (@age * Math.PI / 32)
+			@y += 2
+			if @y < -@height || @y > game.height + @height
+				@remove()
+			if @within player ,24
+				player.item(@itemNumber)
+				@remove()
+		@key = items.length
+		items[@key] = this
+	remove: ->
+		@scene.removeChild this
+		delete items[@key]
+		delete this
+
 Enemy = enchant.Class.create enchant.Sprite,
 	initialize: (@scene,x,y) ->
 		enchant.Sprite.call this, 32, 32
@@ -93,8 +126,11 @@ Enemy = enchant.Class.create enchant.Sprite,
 		@key = enemies.length
 		enemies[@key] = this
 	remove: ->
+		++enemyKillCount
+		if enemyKillCount % 16 == 0
+			new Item @scene, @x, @y
 		@scene.removeChild this
-		delete enemies[this.key]
+		delete enemies[@key]
 		delete this
 	move: ->
 		console.log "Super move"
@@ -132,9 +168,11 @@ Bullet = enchant.Class.create enchant.Sprite,
 				@remove()
 		scene.addChild(this)
 	remove: ->
-		new Bang(@scene, @x, @y)
 		@scene.removeChild(this)
 		delete this
+	bang: ->
+		new Bang(@scene, @x, @y)
+		@remove()
 
 PlayerBullet = enchant.Class.create Bullet,
 	initialize: (scene,x,y,theta) ->
@@ -142,13 +180,15 @@ PlayerBullet = enchant.Class.create Bullet,
 		@addEventListener 'enterframe', ->
 			for key of enemies
 				if enemies[key].intersect this
-					@remove()
+					@bang()
 					enemies[key].remove()
 					break
 
 class Stage1 extends Scene
 	constructor: ->
 		super @
+		enemies = []
+		items = []
 		new BackGround @, i for i in [0..24]
 		player = new Player @, 320, 320
 		@backgroundColor = 'black'
@@ -161,7 +201,8 @@ window.onload = ->
 	game = new Game 640, 480
 	game.fps = 60
 	game.keybind(90, 'a')
-	game.preload('Images/player.png', 'Images/enemy.png', 'Images/bang.png', 'Audio/enemyShoot.wav')
+	game.preload('Images/player.png', 'Images/enemy.png', 'Images/bang.png')
+	# game.preload('Audio/enemyShoot.wav')
 	for i in [1..16]
 		game.preload('Images/bg'+i+'.png')
 
