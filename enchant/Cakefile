@@ -3,8 +3,11 @@ exec = (require 'child_process').exec
 
 FILENAME = 'main'
 FILES = [
-	'main.coffee'
 	'player.coffee'
+	'bang.coffee'
+	'enemy.coffee'
+	'item.coffee'
+	'main.coffee'
 ]
 
 task 'compile', "compile #{FILENAME}.", (options) ->

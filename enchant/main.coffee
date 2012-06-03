@@ -10,8 +10,8 @@ bgMoves =
 	x: (60 * Math.sin(Math.PI * 2 * i / bgWaves) for i in [0..bgWaves])
 	y: (50 * Math.sin(Math.PI * 4 * i / bgWaves) for i in [0..bgWaves])
 
-BackGround = enchant.Class.create enchant.Sprite,
-	initialize: (@scene,i) ->
+class BackGround extends enchant.Sprite
+	constructor: (@scene,i) ->
 		@i = i % bgWaves
 		enchant.Sprite.call this, 640, 60
 		@image = game.assets['Images/bg' + ((i%16)+1) + '.png']
@@ -30,76 +30,6 @@ class SoundLoader
 		@wave.play()
 		@wave = @audio.clone()
 
-Bang = enchant.Class.create enchant.Sprite,
-	initialize: (@scene, x, y) ->
-		enchant.Sprite.call this, 128, 128
-		@image = game.assets['Images/bang.png']
-		@x = x - (@width / 2)
-		@y = y - (@height / 2)
-		this._element.style.zIndex = 1
-		@addEventListener 'enterframe', ->
-			if game.frame % 2 == 0
-				++@frame
-			if @frame > 12
-				@remove()
-		scene.addChild this
-	remove: ->
-		@scene.removeChild @
-		delete @
-
-Item = enchant.Class.create enchant.Sprite,
-	initialize: (@scene,x,y) ->
-		enchant.Sprite.call this, 32, 32
-		@image = game.assets['Images/player.png']
-		@x = x
-		@y = y
-		@age = 0
-		@itemNumber = 0
-		this._element.style.zIndex = 3
-		scene.addChild this
-		@addEventListener 'enterframe', ->
-			++@age
-			@x += 12 * Math.cos (@age * Math.PI / 32)
-			@y += 2
-			if @y < -@height || @y > game.height + @height
-				@remove()
-			if @within player ,24
-				player.item(@itemNumber)
-				@remove()
-		@key = items.length
-		items[@key] = this
-	remove: ->
-		@scene.removeChild this
-		delete items[@key]
-		delete this
-
-Enemy = enchant.Class.create enchant.Sprite,
-	initialize: (@scene,x,y) ->
-		enchant.Sprite.call this, 32, 32
-		@image = game.assets['Images/enemy.png']
-		@x = x
-		@y = y
-		this._element.style.zIndex = 4
-		@addEventListener 'enterframe', ->
-			@move()
-			++@frame
-			if @y < -game.height || @y > 2*game.height || @x < -game.width || @x > 2*game.width
-				@remove()
-			if @within player, 16
-				player.death()
-		scene.addChild this
-		@key = enemies.length
-		enemies[@key] = this
-	remove: ->
-		++enemyKillCount
-		if enemyKillCount % 16 == 0
-			new Item @scene, @x, @y
-		@scene.removeChild this
-		delete enemies[@key]
-		delete this
-	move: ->
-		console.log "Super move"
-
 class YuraEnemy extends Enemy
 	constructor: (scene,x,y) ->
 		super scene,x,y
@@ -115,8 +45,8 @@ class StraightEnemy extends Enemy
 	move: ->
 		@y += 4
 
-Bullet = enchant.Class.create enchant.Sprite,
-	initialize: (@scene,x,y,theta) ->
+class Bullet extends enchant.Sprite
+	constructor: (@scene,x,y,theta) ->
 		enchant.Sprite.call(this,16,16)
 		@image = game.assets['Images/player.png']
 		@x = x - @width/2
@@ -139,8 +69,8 @@ Bullet = enchant.Class.create enchant.Sprite,
 		new Bang(@scene, @x, @y)
 		@remove()
 
-PlayerBullet = enchant.Class.create Bullet,
-	initialize: (scene,x,y,theta) ->
+class PlayerBullet extends Bullet
+	constructor: (scene,x,y,theta) ->
 		Bullet.call(this, scene, x, y, theta)
 		@addEventListener 'enterframe', ->
 			for key of enemies

@@ -1,5 +1,5 @@
-Player = enchant.Class.create enchant.Sprite,
-	initialize: (@scene,x,y) ->
+class Player extends enchant.Sprite
+	constructor: (@scene,x,y) ->
 		enchant.Sprite.call(this, 32, 32)
 		@image = game.assets['Images/player.png']
 		@x = x - (@width / 2)
