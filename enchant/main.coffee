@@ -30,41 +30,6 @@ class SoundLoader
 		@wave.play()
 		@wave = @audio.clone()
 
-Player = enchant.Class.create enchant.Sprite,
-	initialize: (@scene,x,y) ->
-		enchant.Sprite.call(this, 32, 32)
-		@image = game.assets['Images/player.png']
-		@x = x - (@width / 2)
-		@y = y - (@height / 2)
-		@frame = 1
-		# @shootSound = new SoundLoader(game.assets['Audio/enemyShoot.wav'])
-		@moveSpeed = 6
-		@shootSpan = 0
-		@shootType = 0
-		@addEventListener 'enterframe', (e) ->
-			if game.input.right
-				@x += @moveSpeed
-			if game.input.left
-				@x -= @moveSpeed
-			if game.input.up
-				@y -= @moveSpeed
-			if game.input.down
-				@y += @moveSpeed
-			if game.input.a && @shootSpan <= 0
-				new PlayerBullet(@scene, @x+@width/2, @y, 180)
-				for i in [0..@shootType]
-					new PlayerBullet(@scene, @x+@width/2, @y, 180 - 15 * i)
-					new PlayerBullet(@scene, @x+@width/2, @y, 180 + 15 * i)
-				# @shootSound.play()
-				@shootSpan = 4
-			@shootSpan--
-		scene.addChild(this)
-	item: (i) ->
-		switch i
-			when 0 then ++@shootType
-	death: ->
-		game.popScene()
-
 Bang = enchant.Class.create enchant.Sprite,
 	initialize: (@scene, x, y) ->
 		enchant.Sprite.call this, 128, 128
@@ -194,8 +159,8 @@ class Stage1 extends Scene
 		@backgroundColor = 'black'
 		@addEventListener 'enterframe', ->
 			if(game.frame % 10 == 0)
-				new StraightEnemy @, 120, 0
-				new StraightEnemy @, 480, 0
+				new YuraEnemy @, 120, 0
+				new YuraEnemy @, 480, 0
 
 window.onload = ->
 	game = new Game 640, 480
